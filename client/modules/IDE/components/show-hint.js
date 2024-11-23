@@ -24,6 +24,21 @@
 
   // This is the old interface, kept around for now to stay
   // backwards-compatible.
+
+  //event listener to enable escape key functionality
+  function addEscapeKeyListener(cm) {
+    const escapeHandler = (event) => {
+      if (event.key === 'Escape' && cm.state.completionActive) {
+        cm.closeHint(); // Close the hint
+        cm.focus(); // Ensure the editor regains focus
+        document.removeEventListener('keydown', escapeHandler); // Clean up listener
+      }
+    };
+  
+    // Add the event listener when hints are active
+    document.addEventListener('keydown', escapeHandler);
+  }
+
   CodeMirror.showHint = function (cm, getHints, options) {
     if (!getHints) return cm.showHint(options);
     if (options && options.async) getHints.async = true;
@@ -55,6 +70,8 @@
 
     CodeMirror.signal(this, 'startCompletion', this);
     completion.update(true);
+    // Add Escape key listener
+    addEscapeKeyListener(this);
   });
 
   CodeMirror.defineExtension('closeHint', function () {
